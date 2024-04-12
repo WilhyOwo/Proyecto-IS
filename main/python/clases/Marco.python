@@ -1,1 +1,83 @@
+from pdfquery import PDFQuery  # Importa la clase PDFQuery desde el modulo pdfquery
+from difflib import SequenceMatcher  # Importa la clase SequenceMatcher desde el modulo difflib
+import os
+
+while True:
+    try:
+        # Solicita al usuario que ingrese el nombre del primer archivo PDF
+        nombre_pdf_1 = input("Ingrese el nombre del primer archivo PDF: ")
+
+        # Carga el archivo PDF especificado por el usuario usando la clase PDFQuery
+        pdf = PDFQuery(nombre_pdf_1)
+        pdf.load()
+        
+         # Utiliza selectores CSS-like para localizar los elementos en el PDF
+        text_elements = pdf.pq('LTTextLineHorizontal')
+
+        # Extrae el texto de los elementos encontrados
+        text = [t.text for t in text_elements] 
+        break
+    except FileNotFoundError:
+        print("Error: El archivo PDF especificado no se encontro.")
+        opcion = input("Desea ingresar otro nombre de archivo? (s/n): ")
+        if opcion.lower() != 's':
+            exit()
+       
+
+while True:
+    try:
+        # Solicita al usuario que ingrese el nombre del primer archivo PDF
+        nombre_pdf_2 = input("Ingrese el nombre del segundo archivo PDF: ")
+        
+        # Carga el archivo PDF especificado por el usuario usando la clase PDFQuery
+        pdf_2 = PDFQuery(nombre_pdf_2)
+        pdf_2.load()
+        # Utiliza selectores CSS-like para localizar los elementos en el PDF
+        text_elements_2 = pdf_2.pq('LTTextLineHorizontal')
+        # Extrae el texto de los elementos encontrados
+        text_2 = [t.text for t in text_elements_2]
+        break
+    except FileNotFoundError:
+        print("Error: El archivo PDF especificado no se encontro.")
+        opcion = input("Desea ingresar otro nombre de archivo? (s/n): ")
+        if opcion.lower() != 's':
+            exit()
+
+# Une los elementos extraidos en una sola cadena de texto
+text_string = '\n'.join(text)
+text_string_2 = '\n'.join(text_2)
+
+# Define una funcion para encontrar coincidencias entre dos cadenas de texto
+def encuentra_coincidencias(text_string, text_string_2):
+    words1 = text_string.split()  # Divide la cadena en palabras
+    words2 = text_string_2.split()  # Divide la segunda cadena en palabras
+    
+    coincidencias = []
+    for word in words1:
+        if word in words2:
+            coincidencias.append(word)
+    return coincidencias
+
+# Llama a la funcion y almacena el resultado en una variable
+coincidencias = encuentra_coincidencias(text_string, text_string_2)
+
+
+# Obtiene la ruta del directorio actual donde se encuentra el codigo
+directorio_actual = os.getcwd()
+
+# Genera la ruta completa del archivo "Coincidencias.txt" en el directorio actual
+ruta_archivo = os.path.join(directorio_actual, "Coincidencias.txt")
+
+# Abre el archivo de texto en modo de escritura en la carpeta del archivo
+try:
+    with open(ruta_archivo, "w") as archivo:
+        # Escribe las coincidencias en el archivo linea por linea
+        for match in coincidencias:
+            archivo.write(match + ", ")
+    print("Las coincidencias se han guardado en el archivo 'Coincidencias.txt' en la carpeta del codigo.")
+except PermissionError:
+    print("Error: No tienes permiso para escribir en este directorio.")
+except Exception as e:
+    print(f"Error: {e}")
+
 
